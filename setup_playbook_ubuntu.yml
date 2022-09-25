@@ -1,0 +1,129 @@
+---
+
+- hosts: "slave"
+  user: ubuntu
+  become: true
+
+  vars:
+
+    container_count: 4
+
+    packages:
+
+     - openjdk-11-jdk
+
+  tasks:
+
+    - name: Install aptitude
+
+      apt:
+
+       name: aptitude
+
+       state: latest
+
+       update_cache: true
+
+      tags: docker
+
+
+
+    - name: Install required system packages
+
+      apt:
+
+        pkg:
+
+          - apt-transport-https
+
+          - ca-certificates
+
+          - curl
+
+          - software-properties-common
+
+          - python3-pip
+
+          - virtualenv
+
+          - python3-setuptools
+
+        state: latest
+
+        update_cache: true
+
+      tags: docker
+
+    - name: Add Docker GPG apt Key
+
+      apt_key:
+
+        url: https://download.docker.com/linux/ubuntu/gpg
+
+        state: present
+
+      tags: docker
+
+
+
+    - name: Add Docker Repository
+
+      apt_repository:
+
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+
+        state: present
+
+      tags: docker
+
+    - name: Update apt and install docker-ce
+
+      apt:
+
+        name: docker-ce
+
+        state: latest
+
+        update_cache: true
+
+      tags: docker
+
+    - name: Add ubuntu user to the docker group
+      user: 
+        name: ubuntu
+        group: docker
+        groups: sudo 
+        append: yes
+      tags: docker-group
+    
+    - name: Install docker compose
+      get_url:  
+       url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+       dest: /usr/local/bin/docker-compose
+       mode: 'u+x,g+x'
+      tags: docker-compose
+
+    - name: Update APT package manager repositories cache
+
+      apt:
+
+       update_cache: yes
+
+      tags: java
+
+    - name: Install Java 11
+
+      apt:
+
+       name: "{{packages}}"
+
+       state: present
+
+      tags: java
+
+    - name: Install Maven
+      apt:
+       name: maven
+       state: present
+      tags: maven
+
