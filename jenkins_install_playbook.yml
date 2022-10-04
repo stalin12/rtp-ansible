@@ -1,0 +1,17 @@
+---
+- hosts: "master"
+  user: ubuntu
+  become: true
+  tasks:
+   - name: Copying Docker compose related files
+     copy: 
+       src: "{{ item }}"
+       dest: tmp/
+     with_items:
+      - docker-compose.yaml
+      - nginx.conf
+     tags: copy
+   - name: Install Jenkins and Nginx using Docker compose
+     shell:
+       cmd: "docker-compose up -d"
+       chdir: tmp/
